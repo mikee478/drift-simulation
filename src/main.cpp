@@ -126,14 +126,15 @@ int main(void)
 
         renderer.Clear();
 
-        z[0] += 0.0025f;
-        z[1] += 0.0025f;
-        float f = 0.0018f;
+        z[0] += 0.003f;
+        z[1] += 0.003f;
+        float f_angle = 0.0018f;
+        float f_size = 0.0020f;
 
         for(auto &v : vertices)
         {
-            v.angle_noise = glm::perlin(glm::vec3(v.position[0] * f, v.position[1] * f, z[0]));
-            v.size_noise = glm::perlin(glm::vec3(v.position[0] * f, v.position[1] * f, z[1]));
+            v.angle_noise = glm::perlin(glm::vec3(v.position[0] * f_angle, v.position[1] * f_angle, z[0]));
+            v.size_noise = glm::perlin(glm::vec3(v.position[0] * f_size, v.position[1] * f_size, z[1]));
         }
 
         vb.UpdateBuffer(&vertices[0], vertices.size() * sizeof(Vertex));
