@@ -59,6 +59,9 @@ int main(void)
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
 
+    const int N_OUTSIDE_ROWS = 5;
+    const int N_OUTSIDE_COLS = 5;
+
     const int N_ROWS = 35;
     const int N_COLS = 35;
 
@@ -68,9 +71,9 @@ int main(void)
     srand(time(0));
     glm::vec2 z = glm::linearRand(glm::vec2(-10000.0f,-10000.0f), glm::vec2(10000.0f,10000.0f));
 
-    for(int row = 0;row<N_ROWS;row++)
+    for(int row = -N_OUTSIDE_ROWS; row < N_ROWS + N_OUTSIDE_ROWS; row++)
     {
-        for(int col = 0;col<N_COLS;col++)
+        for(int col = -N_OUTSIDE_COLS; col < N_COLS + N_OUTSIDE_COLS; col++)
         {
             float x = col * col_offset;
             float y = row * row_offset;
@@ -111,6 +114,10 @@ int main(void)
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+    double start_time = glfwGetTime();
+    double cur_time, fps;
+    int n_frames = 0;
+
     // Loop until the user closes the window
     while (!glfwWindowShouldClose(window) && !Input::EscapePressed())
     {
@@ -137,6 +144,15 @@ int main(void)
         renderer.Draw(GL_POINTS, va, shader);
 
         glfwSwapBuffers(window);
+
+        cur_time = glfwGetTime();
+        n_frames++;
+        if(n_frames % 10 == 0)
+        {
+            fps = n_frames / (cur_time - start_time);
+            std::cout << "fps = " << std::round(fps) << '\n';
+        }
+        
     }
 
     glfwTerminate();
