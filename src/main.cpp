@@ -16,6 +16,7 @@
 #include "vertex_array.h"
 #include "renderer.h"
 #include "input.h"
+#include "noise.h"
 
 int main(void)
 {
@@ -49,11 +50,12 @@ int main(void)
     if(glewInit() != GLEW_OK)
         std::cout << "GLEW ERROR!" << std::endl;
 
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
     struct Vertex
     {
         float position[2];
-        float angle_noise;
-        float size_noise;
     };
 
     std::vector<Vertex> vertices;
@@ -68,20 +70,11 @@ int main(void)
     float row_offset = static_cast<float>(WINDOW_HEIGHT) / (N_ROWS-1);
     float col_offset = static_cast<float>(WINDOW_WIDTH) / (N_COLS-1);
 
-    srand(time(0));
-    glm::vec2 z = glm::linearRand(glm::vec2(-10000.0f,-10000.0f), glm::vec2(10000.0f,10000.0f));
-
     for(int row = -N_OUTSIDE_ROWS; row < N_ROWS + N_OUTSIDE_ROWS; row++)
     {
         for(int col = -N_OUTSIDE_COLS; col < N_COLS + N_OUTSIDE_COLS; col++)
         {
-            float x = col * col_offset;
-            float y = row * row_offset;
-            vertices.push_back({
-                {x, y},
-                glm::perlin(glm::vec3(x, y, z[0])),
-                glm::perlin(glm::vec3(x, y, z[1]))
-            });
+            vertices.push_back({{col * col_offset, row * row_offset}});
             indices.push_back(vertices.size()-1);
         }
     }
@@ -91,8 +84,6 @@ int main(void)
 
     VertexBufferLayout layout;
     layout.Push<float>(2); // position
-    layout.Push<float>(1); // angle noise
-    layout.Push<float>(1); // size noise
 
     IndexBuffer ib(&indices[0], indices.size());
 
@@ -109,10 +100,16 @@ int main(void)
     glm::mat4 proj_mat = glm::ortho(0.0f, static_cast<float>(WINDOW_WIDTH), 0.0f, static_cast<float>(WINDOW_HEIGHT));
     shader.SetUniformMatrix4f("proj_mat", proj_mat);
 
-    float hue_drift = glm::linearRand(0.0f, 1.0f);
+    srand(time(0));
+    float angle_z = glm::linearRand(-10000.0f, 10000.0f);
+    float size_z = glm::linearRand(-10000.0f, 10000.0f);
 
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    float hue_drift = glm::linearRand(0.0f, 1.0f);
+    float f_angle = 0.0015f;
+    float f_size = 0.00175f;
+
+    shader.SetUniform1f("angle_scale", f_angle);
+    shader.SetUniform1f("size_scale", f_size);
 
     double start_time = glfwGetTime();
     double cur_time, fps;
@@ -126,20 +123,12 @@ int main(void)
 
         renderer.Clear();
 
-        z[0] += 0.003f;
-        z[1] += 0.003f;
-        float f_angle = 0.0018f;
-        float f_size = 0.0020f;
-
-        for(auto &v : vertices)
-        {
-            v.angle_noise = glm::perlin(glm::vec3(v.position[0] * f_angle, v.position[1] * f_angle, z[0]));
-            v.size_noise = glm::perlin(glm::vec3(v.position[0] * f_size, v.position[1] * f_size, z[1]));
-        }
-
-        vb.UpdateBuffer(&vertices[0], vertices.size() * sizeof(Vertex));
-
+        angle_z += 0.0025f;
+        size_z += 0.003f;
         hue_drift += 0.0005f;
+
+        shader.SetUniform1f("angle_z", angle_z);
+        shader.SetUniform1f("size_z", size_z);
         shader.SetUniform1f("hue_drift", hue_drift);
 
         renderer.Draw(GL_POINTS, va, shader);

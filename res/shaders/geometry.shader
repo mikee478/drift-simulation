@@ -19,6 +19,112 @@ uniform float hue_drift;
 
 #define PI 3.1415926538
 
+uniform float angle_scale;
+uniform float angle_z;
+uniform float size_scale;
+uniform float size_z;
+
+
+// ******************** PERLIN NOISE ********************
+
+uniform uint seed;
+
+// https://stackoverflow.com/a/12996028
+uint Hash(uint x)
+{
+    x = ((x >> 16) ^ x) * 0x45d9f3b;
+    x = ((x >> 16) ^ x) * 0x45d9f3b;
+    x = (x >> 16) ^ x;
+    return x;
+}
+
+// https://stackoverflow.com/a/27952689
+uint HashCombine(uint lhs, uint rhs)
+{
+    lhs ^= rhs + 0x9e3779b9 + (lhs << 6) + (lhs >> 2);
+    return lhs;
+}
+
+vec3 RandomGradient(int xi, int yi, int zi)
+{
+    uint h = HashCombine(HashCombine(HashCombine(Hash(xi), Hash(yi)), Hash(zi)), Hash(seed));
+
+    vec3 grads[12] = vec3[](
+        normalize(vec3( 1.0f, 0.0f, 1.0f)),
+        normalize(vec3(-1.0f, 0.0f, 1.0f)),
+        normalize(vec3( 0.0f, 1.0f, 1.0f)),
+        normalize(vec3( 0.0f,-1.0f, 1.0f)),
+
+        normalize(vec3( 1.0f, 0.0f,-1.0f)),
+        normalize(vec3(-1.0f, 0.0f,-1.0f)),
+        normalize(vec3( 0.0f, 1.0f,-1.0f)),
+        normalize(vec3( 0.0f,-1.0f,-1.0f)),
+
+        normalize(vec3( 1.0f, 1.0f, 0.0f)),
+        normalize(vec3(-1.0f, 1.0f, 0.0f)),
+        normalize(vec3( 1.0f,-1.0f, 0.0f)),
+        normalize(vec3(-1.0f,-1.0f, 0.0f))
+    );
+
+    return grads[h % 12];
+}
+
+float DotGridGradient(float x, float y, float z, int xi, int yi, int zi)
+{
+    vec3 g = RandomGradient(xi,yi,zi);
+    float dx = x - xi, dy = y - yi, dz = z - zi;
+    return (g.x * dx) + (g.y * dy) + (g.z * dz);
+}
+
+float SmootherStep(float x)
+{
+    return x * x * x * (x * (x * 6 - 15) + 10);
+}
+
+float PerlinNoise(float x, float y, float z)
+{
+        int x0 = int(floor(x));
+        int x1 = x0 + 1;
+        int y0 = int(floor(y));
+        int y1 = y0 + 1;
+        int z0 = int(floor(z));
+        int z1 = z0 + 1;
+
+        float dx = x - x0;
+        float dy = y - y0;
+        float dz = z - z0;
+
+        dx = SmootherStep(dx);
+        dy = SmootherStep(dy);
+        dz = SmootherStep(dz);
+
+        float p0 = DotGridGradient(x, y, z, x0, y0, z0);
+        float p1 = DotGridGradient(x, y, z, x1, y0, z0);
+        float l0 = mix(p0, p1, dx);
+
+        p0 = DotGridGradient(x, y, z, x0, y1, z0);
+        p1 = DotGridGradient(x, y, z, x1, y1, z0);
+        float l1 = mix(p0, p1, dx);
+
+        float f0 = mix(l0, l1, dy);
+
+        p0 = DotGridGradient(x, y, z, x0, y0, z1);
+        p1 = DotGridGradient(x, y, z, x1, y0, z1);
+        l0 = mix(p0, p1, dx);
+
+        p0 = DotGridGradient(x, y, z, x0, y1, z1);
+        p1 = DotGridGradient(x, y, z, x1, y1, z1);
+        l1 = mix(p0, p1, dx);
+
+        float f1 = mix(l0, l1, dy);
+
+        // multiply by const factor to bring into range [-1,1]
+        return mix(f0, f1, dz) * 1.6f;
+}
+
+// ******************** PERLIN NOISE ********************
+
+
 // All components are in the range [0,1], including hue.
 vec3 hsv2rgb(vec3 c)
 {
@@ -29,10 +135,22 @@ vec3 hsv2rgb(vec3 c)
 
 void main()
 {
-    float angle_noise = gs_in[0].angle_noise / 2.0 + 0.5;
+    // float angle_noise = gs_in[0].angle_noise / 2.0 + 0.5;
+    float angle_noise = PerlinNoise(
+        gl_in[0].gl_Position.x * angle_scale, 
+        gl_in[0].gl_Position.y * angle_scale, 
+        angle_z
+    ) / 2.0 + 0.5;
+
     float theta = angle_noise * PI*4;
 
-    float size_noise = gs_in[0].size_noise / 2.0 + 0.5;
+    // float size_noise = gs_in[0].size_noise / 2.0 + 0.5;
+    float size_noise = PerlinNoise(
+        gl_in[0].gl_Position.x * size_scale, 
+        gl_in[0].gl_Position.y * size_scale, 
+        size_z
+    ) / 2.0 + 0.5;
+
     float length = max(0.0, pow(size_noise, 3.0) * 225.0 - 15.0);
     float width = min(20.0, max(0.0, length / 3.0));
 
