@@ -1,6 +1,5 @@
 # Drift Simulation
 
-Drift simulation using Perlin noise in OpenGL
+Drift simulation using Perlin noise in OpenGL. Perlin noise is implemented in the shaders. 
 
-
-https://user-images.githubusercontent.com/28791222/221956572-b6ab7ce9-6a21-4fb4-86fe-bd9274821bbf.mov
+https://user-images.githubusercontent.com/28791222/222820775-f021ffb6-e0f8-4870-83ef-a5f8a9aa166c.mov
