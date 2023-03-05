@@ -151,8 +151,11 @@ void main()
         size_z
     ) / 2.0 + 0.5;
 
-    float length = max(0.0, pow(size_noise, 3.0) * 225.0 - 15.0);
-    float width = min(20.0, max(0.0, length / 3.0));
+    float length = max(0.0, pow(size_noise, 3.0) * 225.0 - 10.0);
+    float width = min(20.0, max(0.0, length / 3.5));
+
+    length *= 35.0/50.0;
+    width *= 35.0/50.0;
 
     vec3 base_point = gl_in[0].gl_Position.xyz;
     vec3 tip_point = base_point + length * vec3(cos(theta), sin(theta), 0.0);
@@ -167,10 +170,10 @@ void main()
     vec3 base_left = base_point - right * width / 2.0;
     vec3 tip_left = base_left + forward * length;
 
-    float hue = angle_noise / 4.0 + hue_drift;
+    float hue = angle_noise / 2.0 + hue_drift;
     hue = hue - int(hue);
 
-    vec3 color = hsv2rgb(vec3(hue, 1.0, 0.7));
+    vec3 color = hsv2rgb(vec3(hue, 1.0, 0.8));
 
     float tip_alpha = 0.75f;
     float base_alpha = 0.0f;

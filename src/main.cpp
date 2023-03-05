@@ -64,8 +64,8 @@ int main(void)
     const int N_OUTSIDE_ROWS = 5;
     const int N_OUTSIDE_COLS = 5;
 
-    const int N_ROWS = 35;
-    const int N_COLS = 35;
+    const int N_ROWS = 50;
+    const int N_COLS = 50;
 
     float row_offset = static_cast<float>(WINDOW_HEIGHT) / (N_ROWS-1);
     float col_offset = static_cast<float>(WINDOW_WIDTH) / (N_COLS-1);
@@ -123,8 +123,8 @@ int main(void)
 
         renderer.Clear();
 
-        angle_z += 0.0025f;
-        size_z += 0.003f;
+        angle_z += 0.0025f * 1.25f;
+        size_z += 0.003f * 1.25;
         hue_drift += 0.0005f;
 
         shader.SetUniform1f("angle_z", angle_z);
