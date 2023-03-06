@@ -23,6 +23,7 @@ public:
     void SetUniform4f(const std::string& name, const glm::vec4 &v);
 
     void SetUniform1i(const std::string& name, int v0);
+    void SetUniform1ui(const std::string& name, unsigned int v0);
 
     void SetUniformMatrix3f(const std::string& name, const glm::mat3 &matrix);
     void SetUniformMatrix4f(const std::string& name, const glm::mat4 &matrix);

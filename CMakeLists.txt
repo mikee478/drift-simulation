@@ -30,6 +30,14 @@ PRIVATE
     src/shader.cpp
     src/index_buffer.cpp
     src/vertex_array.cpp
+
+    src/imgui/imgui_demo.cpp
+    src/imgui/imgui_draw.cpp
+    src/imgui/imgui_impl_glfw.cpp
+    src/imgui/imgui_impl_opengl3.cpp
+    src/imgui/imgui_tables.cpp
+    src/imgui/imgui_widgets.cpp
+    src/imgui/imgui.cpp
 )
 
 target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra)
