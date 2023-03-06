@@ -109,8 +109,8 @@ int main(void)
     float angle_z = 0.0f;
     float size_z = 0.0f;
     float hue_drift = glm::linearRand(0.0f, 1.0f);
-    float angle_scale = 0.00175f;
-    float size_scale = 0.00175f;
+    float angle_scale = 0.002f;
+    float size_scale = 0.002f;
 
     float angle_z_delta = 0.004f;
     float size_z_delta = 0.004f;

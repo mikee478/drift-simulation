@@ -3,12 +3,6 @@
 layout (points) in;
 layout (triangle_strip, max_vertices = 64) out;
 
-in VS_OUT
-{
-    float angle_noise;
-    float size_noise;
-} gs_in [];
-
 out GS_OUT
 {
     vec4 color;
@@ -49,21 +43,22 @@ vec3 RandomGradient(int xi, int yi, int zi)
 {
     uint h = HashCombine(HashCombine(HashCombine(Hash(xi), Hash(yi)), Hash(zi)), Hash(seed));
 
+    const float a = 0.707106781187; // 1/sqrt(2)
     vec3 grads[12] = vec3[](
-        normalize(vec3( 1.0f, 0.0f, 1.0f)),
-        normalize(vec3(-1.0f, 0.0f, 1.0f)),
-        normalize(vec3( 0.0f, 1.0f, 1.0f)),
-        normalize(vec3( 0.0f,-1.0f, 1.0f)),
+        vec3(   a, 0.0, a),
+        vec3(  -a, 0.0, a),
+        vec3( 0.0,   a, a),
+        vec3( 0.0,  -a, a),
 
-        normalize(vec3( 1.0f, 0.0f,-1.0f)),
-        normalize(vec3(-1.0f, 0.0f,-1.0f)),
-        normalize(vec3( 0.0f, 1.0f,-1.0f)),
-        normalize(vec3( 0.0f,-1.0f,-1.0f)),
+        vec3(   a, 0.0, -a),
+        vec3(  -a, 0.0, -a),
+        vec3( 0.0,   a, -a),
+        vec3( 0.0,  -a, -a),
 
-        normalize(vec3( 1.0f, 1.0f, 0.0f)),
-        normalize(vec3(-1.0f, 1.0f, 0.0f)),
-        normalize(vec3( 1.0f,-1.0f, 0.0f)),
-        normalize(vec3(-1.0f,-1.0f, 0.0f))
+        vec3( a,  a, 0.0),
+        vec3(-a,  a, 0.0),
+        vec3( a, -a, 0.0),
+        vec3(-a, -a, 0.0)
     );
 
     return grads[h % 12];
@@ -119,7 +114,7 @@ float PerlinNoise(float x, float y, float z)
         float f1 = mix(l0, l1, dy);
 
         // multiply by const factor to bring into range [-1,1]
-        return mix(f0, f1, dz) * 1.6f;
+        return mix(f0, f1, dz) * 1.6;
 }
 
 // ******************** PERLIN NOISE ********************
@@ -135,7 +130,6 @@ vec3 hsv2rgb(vec3 c)
 
 void main()
 {
-    // float angle_noise = gs_in[0].angle_noise / 2.0 + 0.5;
     float angle_noise = PerlinNoise(
         gl_in[0].gl_Position.x * angle_scale, 
         gl_in[0].gl_Position.y * angle_scale, 
@@ -144,7 +138,6 @@ void main()
 
     float theta = angle_noise * PI*4;
 
-    // float size_noise = gs_in[0].size_noise / 2.0 + 0.5;
     float size_noise = PerlinNoise(
         gl_in[0].gl_Position.x * size_scale, 
         gl_in[0].gl_Position.y * size_scale, 
@@ -175,8 +168,8 @@ void main()
 
     vec3 color = hsv2rgb(vec3(hue, 1.0, 0.8));
 
-    float tip_alpha = 0.75f;
-    float base_alpha = 0.0f;
+    float tip_alpha = 0.75;
+    float base_alpha = 0.0;
 
     gl_Position = proj_mat * vec4(base_right, 1.0);
     gs_out.color = vec4(color, base_alpha);
