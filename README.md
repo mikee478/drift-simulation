@@ -1,5 +1,5 @@
 # Drift Simulation
 
-Drift simulation using Perlin noise in OpenGL. Perlin noise is implemented in the shaders. This project is inspired by the macOS Drift screensaver.
+Drift simulation using 3D [Perlin noise](https://en.wikipedia.org/wiki/Perlin_noise) in OpenGL. This project is inspired by the [macOS Drift screensaver](https://www.youtube.com/watch?v=7WXzRhebz1g&ab_channel=NobelTech). Each line's rotation, length, width, and color are derived from 3D Perlin noise implemented in the shaders.
 
 https://user-images.githubusercontent.com/28791222/223185519-3d3de2b3-48d0-40cd-bcfe-7a30d9a7ac29.mp4
